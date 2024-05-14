@@ -3647,3 +3647,18 @@ func ExampleNewFromFloat() {
 	//0.123123123123123
 	//-10000000000000
 }
+
+func FuzzNewFromFloatWithExponent(f *testing.F) {
+	f.Fuzz(func(t *testing.T, value float64, exp int32) {
+		dec := NewFromFloatWithExponent(value, exp)
+		if exp < -8 {
+			return
+		}
+		if w := strings.TrimRight(fmt.Sprintf("%f", value), "0"); w[len(w)-1:] == "5" {
+			return
+		}
+		if !NewFromFloat(value).Round(-exp).Equal(dec) {
+			t.Errorf("NewFromFloatWithExponent(%v,%v) = %v != %v", value, exp, dec.String(), NewFromFloat(value).Round(-exp))
+		}
+	})
+}
